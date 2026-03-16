@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Positive Strides — Volunteer Application</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+/* ══════════════════════════════════════════════
+   EMAILJS CONFIGURATION — update these 3 values
+   ══════════════════════════════════════════════
+   EJS_SERVICE  : Your EmailJS Service ID  (e.g. service_1rbuavb)
+   EJS_TEMPLATE : Your EmailJS Template ID (e.g. template_xxxxxxx)
+                  Template body: {{message}}
+                  Template To Email: hardcode positivestridesoffice@gmail.com
+                  Template Subject: {{subject}}
+   EJS_KEY      : Your EmailJS Public Key
+   ══════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  background: #f0f4f8;
+  color: #1a2a3a;
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.hdr {
+  background: #1a3a5c;
+  color: #fff;
+  text-align: center;
+  padding: 22px 20px 18px;
+}
+.hdr img { height: 64px; margin-bottom: 8px; }
+.hdr h1 { font-size: 1.55rem; font-weight: 700; letter-spacing: .03em; }
+.hdr p  { font-size: .85rem; opacity: .8; margin-top: 3px; }
+
+/* ── STEPPER ── */
+.stepper {
+  display: flex;
+  justify-content: center;
+  background: #fff;
+  border-bottom: 2px solid #d0dce8;
+  overflow-x: auto;
+}
+.step-btn {
+  flex: 1 1 0;
+  min-width: 80px;
+  max-width: 180px;
+  padding: 10px 6px 8px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-size: .72rem;
+  font-weight: 600;
+  color: #7a90a4;
+  text-align: center;
+  transition: color .2s, border-color .2s;
+  line-height: 1.25;
+}
+.step-btn .snum {
+  display: block;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: #d0dce8;
+  color: #7a90a4;
+  font-size: .75rem;
+  font-weight: 700;
+  line-height: 24px;
+  margin: 0 auto 4px;
+  transition: background .2s, color .2s;
+}
+.step-btn.active { color: #1a3a5c; border-bottom-color: #2a7ab5; }
+.step-btn.active .snum { background: #2a7ab5; color: #fff; }
+.step-btn.done .snum  { background: #2e8b57; color: #fff; }
+.step-btn.done { color: #2e8b57; }
+
+/* ── WRAP & PANELS ── */
+.wrap { max-width: 760px; margin: 0 auto; padding: 24px 16px 60px; }
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ── CARDS ── */
+.card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px rgba(0,0,0,.09);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.card-hd {
+  background: #1a3a5c;
+  color: #fff;
+  padding: 10px 18px;
+  font-size: .85rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.card-body { padding: 18px 18px 12px; }
+
+/* ── FORM ROWS ── */
+.row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; }
+.field        { display: flex; flex-direction: column; flex: 1 1 180px; }
+.field.full   { flex: 1 1 100%; }
+.field.half   { flex: 1 1 calc(50% - 6px); }
+.field.third  { flex: 1 1 calc(33% - 8px); }
+.field.w130   { flex: 0 0 130px; }
+.field.w90    { flex: 0 0 90px; }
+
+label {
+  font-size: .78rem;
+  font-weight: 600;
+  color: #2a4a6a;
+  margin-bottom: 4px;
+}
+label .req { color: #c0392b; margin-left: 2px; }
+
+input[type="text"],
+input[type="tel"],
+input[type="email"],
+select,
+textarea {
+  border: 1px solid #b8ccd8;
+  border-radius: 5px;
+  padding: 7px 10px;
+  font-size: .88rem;
+  color: #1a2a3a;
+  background: #fafcfd;
+  transition: border-color .18s, box-shadow .18s;
+  width: 100%;
+  font-family: inherit;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #2a7ab5;
+  box-shadow: 0 0 0 3px rgba(42,122,181,.13);
+  background: #fff;
+}
+input.err, select.err, textarea.err { border-color: #c0392b; background: #fff5f5; }
+textarea { resize: vertical; min-height: 72px; }
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23556' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+
+/* ── CUSTOM DATE FIELD (MM/DD/YYYY auto-advance) ── */
+.date-parts {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  border: 1px solid #b8ccd8;
+  border-radius: 5px;
+  background: #fafcfd;
+  padding: 6px 10px;
+  transition: border-color .18s, box-shadow .18s;
+}
+.date-parts:focus-within {
+  border-color: #2a7ab5;
+  box-shadow: 0 0 0 3px rgba(42,122,181,.13);
+  background: #fff;
+}
+.date-parts.err { border-color: #c0392b; background: #fff5f5; }
+.date-seg {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: .95rem;
+  color: #1a2a3a;
+  text-align: center;
+  padding: 1px 3px;
+  font-family: inherit;
+  -moz-appearance: textfield;
+  min-width: 0;
+}
+.date-seg::-webkit-inner-spin-button,
+.date-seg::-webkit-outer-spin-button { -webkit-appearance: none; }
+.date-seg.mm  { width: 42px; }
+.date-seg.dd  { width: 36px; }
+.date-seg.yy  { width: 58px; }
+.date-sep { color: #7a8a9a; font-size: .9rem; user-select: none; padding: 0 2px; }
+
+/* ── RADIO / CHECKBOX GROUPS ── */
+.radio-group, .check-group {
+  display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: 4px;
+}
+.radio-group label, .check-group label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: .85rem; font-weight: 500; color: #1a2a3a; cursor: pointer;
+}
+.radio-group input, .check-group input { width: auto; margin: 0; }
+
+/* ── AVAILABILITY TABLE ── */
+.avail-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+.avail-table th, .avail-table td {
+  border: 1px solid #d0dce8;
+  padding: 7px 4px;
+  text-align: center;
+  vertical-align: middle;
+}
+.avail-table th { background: #e8f0f8; font-weight: 700; color: #1a3a5c; }
+.avail-table td:first-child { background: #f4f7fa; font-weight: 700; color: #1a3a5c; text-align: left; padding-left: 10px; }
+.avail-table input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #2a7ab5; }
+
+/* ── DANCING SCRIPT TYPED SIGNATURE ── */
+.sig-typed-wrapper {
+  border: 1px solid #b8ccd8;
+  border-radius: 5px;
+  background: #fff;
+  position: relative;
+  padding: 8px 12px 28px;
+  overflow: hidden;
+}
+.sig-typed-wrapper.err { border-color: #c0392b; }
+.sig-typed-input {
+  width: 100%;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-family: 'Dancing Script', cursive !important;
+  font-size: 1.6rem !important;
+  font-weight: 600 !important;
+  color: #1a1a6e !important;
+  padding: 0 !important;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+}
+.sig-typed-input::placeholder {
+  font-family: 'Dancing Script', cursive;
+  font-size: 1.3rem;
+  color: #c0ccd8;
+  font-weight: 400;
+}
+.sig-typed-input.err { border-bottom: 2px solid #c0392b !important; }
+.sig-underline {
+  position: absolute;
+  bottom: 22px;
+  left: 12px; right: 12px;
+  height: 1px;
+  background: #b8ccd8;
+  pointer-events: none;
+}
+.sig-caption {
+  position: absolute;
+  bottom: 6px;
+  left: 12px;
+  font-size: .68rem;
+  color: #7a8a9a;
+  pointer-events: none;
+  font-style: italic;
+}
+.sig-typed-note {
+  font-size: .71rem;
+  color: #7a8a9a;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* ── CANVAS SIGNATURE PAD ── */
+.sig-wrap { position: relative; }
+.sig-canvas {
+  border: 1px solid #b8ccd8;
+  border-radius: 5px;
+  background: #fff;
+  cursor: crosshair;
+  display: block;
+  width: 100%;
+  touch-action: none;
+}
+.sig-canvas.err { border-color: #c0392b; }
+.sig-clear {
+  position: absolute; top: 6px; right: 8px;
+  background: rgba(255,255,255,.85);
+  border: 1px solid #b8ccd8;
+  border-radius: 3px;
+  font-size: .72rem;
+  padding: 2px 8px;
+  cursor: pointer;
+  color: #5a6a7a;
+}
+.sig-clear:hover { background: #f0f0f0; }
+.sig-label { font-size: .72rem; color: #7a8a9a; margin-top: 3px; text-align: center; }
+
+/* ── POLICY / WAIVER BOX ── */
+.policy-box {
+  background: #f4f7fa;
+  border: 1px solid #d0dce8;
+  border-radius: 5px;
+  padding: 14px 16px;
+  font-size: .83rem;
+  line-height: 1.6;
+  color: #2a3a4a;
+  margin-bottom: 14px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+.policy-box ol { padding-left: 20px; }
+.policy-box ol li { margin-bottom: 6px; }
+.policy-box p  { margin-bottom: 8px; }
+.policy-box ul { padding-left: 22px; }
+.policy-box ul li { margin-bottom: 4px; }
+
+/* ── WAIVER WARNING — bold red, pink bg ── */
+.waiver-note {
+  background: #ffe4e4;
+  border: 1px solid #e08080;
+  border-radius: 4px;
+  padding: 10px 14px;
+  font-size: .92rem;
+  color: #b00000;
+  margin-bottom: 14px;
+  font-weight: 700;
+}
+
+/* ── ACK CHECKBOX ── */
+.ack-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+.ack-row input[type="checkbox"] { width: 18px; height: 18px; margin-top: 2px; flex-shrink: 0; accent-color: #2a7ab5; cursor: pointer; }
+.ack-row label { font-size: .85rem; font-weight: 500; color: #1a2a3a; cursor: pointer; }
+
+/* ── ERROR BOX ── */
+.err-box {
+  background: #fff0f0;
+  border: 1px solid #e88;
+  border-radius: 5px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: .83rem;
+  color: #900;
+  display: none;
+}
+.err-box.on { display: block; }
+.err-box ul { padding-left: 18px; margin-top: 6px; }
+.err-box li { margin-bottom: 3px; }
+
+/* ── NAV BUTTONS ── */
+.nav-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  gap: 12px;
+}
+.btn {
+  padding: 10px 28px;
+  border-radius: 5px;
+  border: none;
+  font-size: .9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .18s, transform .1s;
+}
+.btn:active { transform: scale(.97); }
+.btn-prev { background: #e0eaf4; color: #1a3a5c; }
+.btn-prev:hover { background: #c8d8e8; }
+.btn-next { background: #2a7ab5; color: #fff; }
+.btn-next:hover { background: #1a5a95; }
+.btn-submit { background: #2e8b57; color: #fff; padding: 12px 40px; font-size: 1rem; }
+.btn-submit:hover { background: #236b43; }
+.btn-submit:disabled { background: #8ab8a0; cursor: not-allowed; }
+
+/* ── SUCCESS ── */
+#success {
+  display: none;
+  text-align: center;
+  padding: 40px 20px;
+}
+.success-icon { font-size: 3.5rem; margin-bottom: 16px; }
+#success h2 { font-size: 1.6rem; color: #2e8b57; margin-bottom: 12px; }
+#success p  { font-size: .95rem; color: #3a5a4a; max-width: 480px; margin: 0 auto; line-height: 1.6; }
+
+/* ── HELPERS ── */
+.hint { font-size: .73rem; color: #6a7a8a; margin-top: 3px; font-style: italic; }
+.subsection-label { font-size: .8rem; font-weight: 700; color: #1a3a5c; margin-bottom: 8px; margin-top: 4px; }
+
+@media (max-width: 540px) {
+  .field.half, .field.third { flex: 1 1 100%; }
+  .field.w130, .field.w90  { flex: 1 1 100%; }
+  .step-btn { font-size: .65rem; padding: 8px 3px 6px; }
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <img src="https://quasimom-9.github.io/PSApplication/ps-logo.png" alt="Positive Strides" onerror="this.style.display='none'">
+  <h1>Volunteer Application</h1>
+  <p>Positive Strides Center &bull; Therapeutic Horseback Riding</p>
+</div>
+
+<div class="stepper">
+  <button class="step-btn active" onclick="goTo(0)" id="stab0"><span class="snum">1</span>Volunteer Info</button>
+  <button class="step-btn"        onclick="goTo(1)" id="stab1"><span class="snum">2</span>Medical Auth</button>
+  <button class="step-btn"        onclick="goTo(2)" id="stab2"><span class="snum">3</span>Confidentiality</button>
+  <button class="step-btn"        onclick="goTo(3)" id="stab3"><span class="snum">4</span>Liability Waiver</button>
+  <button class="step-btn"        onclick="goTo(4)" id="stab4"><span class="snum">5</span>Farm Waiver</button>
+</div>
+
+<div class="wrap">
+  <div id="success">
+    <div class="success-icon">✅</div>
+    <h2>Application Submitted!</h2>
+    <p>Thank you for volunteering with Positive Strides. Your application has been sent to our office. We'll be in touch soon with next steps including orientation information.</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       STEP 1 — VOLUNTEER INFORMATION
+  ══════════════════════════════════════════ -->
+  <div class="panel active" id="panel0">
+
+    <div class="card">
+      <div class="card-hd">Contact Information</div>
+      <div class="card-body">
+        <div class="row">
+          <div class="field half">
+            <label>Name <span class="req">*</span></label>
+            <input type="text" id="v-name" placeholder="Full name" class="tc-name" autocomplete="off">
+          </div>
+          <div class="field half">
+            <label>Date of Birth <span class="req">*</span></label>
+            <div class="date-parts" id="v-dob-wrap">
+              <input type="text" class="date-seg mm" id="v-dob-mm" placeholder="MM" maxlength="2" inputmode="numeric" autocomplete="off">
+              <span class="date-sep">/</span>
+              <input type="text" class="date-seg dd" id="v-dob-dd" placeholder="DD" maxlength="2" inputmode="numeric" autocomplete="off">
+              <span class="date-sep">/</span>
+              <input type="text" class="date-seg yy" id="v-dob-yy" placeholder="YYYY" maxlength="4" inputmode="numeric" autocomplete="off">
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field full"><label>Street Address <span class="req">*</span></label><input type="text" id="v-street" placeholder="Street address" autocomplete="off"></div>
+        </div>
+        <div class="row">
+          <div class="field half"><label>City <span class="req">*</span></label><input type="text" id="v-city" class="tc-name" autocomplete="off"></div>
+          <div class="field w90"><label>State <span class="req">*</span></label><input type="text" id="v-state" value="MD" maxlength="2" autocomplete="off"></div>
+          <div class="field w130"><label>Zip Code <span class="req">*</span></label><input type="text" id="v-zip" maxlength="10" placeholder="12345" autocomplete="off"></div>
+        </div>
+        <div class="row">
+          <div class="field third"><label>Home Phone</label><input type="tel" id="v-home-phone" placeholder="(___) ___-____" class="phone-fmt" autocomplete="off"></div>
+          <div class="field third"><label>Cell <span class="req">*</span></label><input type="tel" id="v-cell" placeholder="(___) ___-____" class="phone-fmt" autocomplete="off"></div>
+          <div class="field third"><label>Work Phone</label><input type="tel" id="v-work-phone" placeholder="(___) ___-____" class="phone-fmt" autocomplete="off"></div>
+        </div>
+        <div class="row">
+          <div class="field half"><label>Email <span class="req">*</span></label><input type="email" id="v-email" placeholder="email@example.com" autocomplete="off"></div>
+          <div class="field half">
+            <label>Preferred Contact <span class="req">*</span></label>
+            <div class="radio-group" style="margin-top:8px;">
+              <label><input type="radio" name="v-pref" value="Email"> Email</label>
+              <label><input type="radio" name="v-pref" value="Home"> Home</label>
+              <label><input type="radio" name="v-pref" value="Cell"> Cell</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">Photo Release</div>
+      <div class="card-body">
+        <p style="font-size:.85rem;color:#3a4a5a;margin-bottom:12px;line-height:1.55;">
+          I <strong>CONSENT / DO NOT CONSENT</strong> to and authorize the use and reproduction by Positive Strides, Inc. of any photographs and/or audio-visual materials taken of me which may be used for promotional materials, educational activities, exhibitions, newsletters or for any other use for the benefit of the Program.
+        </p>
+        <div class="row">
+          <div class="field full">
+            <label>Photo Release Decision <span class="req">*</span></label>
+            <div class="radio-group" style="margin-top:8px;">
+              <label><input type="radio" name="photo" value="CONSENT"> I CONSENT</label>
+              <label><input type="radio" name="photo" value="DO NOT CONSENT"> I DO NOT CONSENT</label>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field half">
+            <label>Signature — Volunteer, Parent, or Guardian <span class="req">*</span></label>
+            <div class="sig-typed-wrapper" id="sig-photo-wrap">
+              <input type="text" class="sig-typed-input" id="sig-photo"
+                     placeholder="Type your full name to sign"
+                     autocomplete="off" spellcheck="false" readonly
+                     onfocus="this.removeAttribute('readonly')" onclick="this.removeAttribute('readonly')">
+              <div class="sig-underline"></div>
+              <div class="sig-caption">Electronic Signature</div>
+            </div>
+            <p class="sig-typed-note">Type your name above as your electronic signature</p>
+          </div>
+          <div class="field half">
+            <label>Date <span class="req">*</span></label>
+            <div class="date-parts" id="date-photo-wrap">
+              <input type="text" class="date-seg mm" id="date-photo-mm" placeholder="MM" maxlength="2" inputmode="numeric" autocomplete="off">
+              <span class="date-sep">/</span>
+              <input type="text" class="date-seg dd" id="date-photo-dd" placeholder="DD" maxlength="2" inputmode="numeric" autocomplete="off">
+              <span class="date-sep">/</span>
+              <input type="text" class="date-seg yy" id="date-photo-yy" placeholder="YYYY" maxlength="4" inputmode="numeric" autocomplete="off">
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field half">
+            <label>Printed Name <span class="req">*</span></label>
+            <input type="text" id="pname-photo" placeholder="Print your full name" class="tc-name autofill-name" autocomplete="off">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">Volunteer Availability</div>
+      <div class="card-body">
+        <p style="font-size:.82rem;color:#5a6a7a;margin-bottom:12px;">Check all times you are available to volunteer.</p>
+        <div style="overflow-x:auto;">
+          <table class="avail-table">
+            <thead>
+              <tr>
+                <th style="min-width:50px;"></th>
+                <th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>AM</td>
+                <td><input type="checkbox" name="avail" value="Mon AM"></td>
+                <td><input type="checkbox" name="avail" value="Tue AM"></td>
+                <td><input type="checkbox" name="avail" value="Wed AM"></td>
+                <td><input type="checkbox" name="avail" value="Thu AM"></td>
+                <td><input type="checkbox" name="avail" value="Fri AM"></td>
+                <td><input type="checkbox" name="avail" value="Sat AM"></td>
+                <td><input type="checkbox" name="avail" value="Sun AM"></td>
+              </tr>
+              <tr>
+                <td>PM</td>
+                <td><input type="checkbox" name="avail" value="Mon PM"></td>
+                <td><input type="checkbox" name="avail" value="Tue PM"></td>
+                <td><input type="checkbox" name="avail" value="Wed PM"></td>
+                <td><input type="checkbox" name="avail" value="Thu PM"></td>
+                <td><input type="checkbox" name="avail" value="Fri PM"></td>
+                <td><input type="checkbox" name="avail" value="Sat PM"></td>
+                <td><input type="checkbox" name="avail" value="Sun PM"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">Special Interests &amp; Hobbies</div>
+      <div class="card-body">
+        <p style="font-size:.82rem;color:#3a4a5a;margin-bottom:10px;line-height:1.5;">
+          Positive Strides seeks volunteers for: Horse Leaders, Side Walkers, Horse Resource Persons, Reception Area Resource Person, Barn Volunteers, Office Volunteers, and Special Skills Volunteers (grant writing, photography, event planning, fundraising, landscaping, etc.).
+        </p>
+        <div class="row">
+          <div class="field full">
+            <label>Special Interests / Skills / Hobbies</label>
+            <textarea id="v-interests" rows="3" placeholder="Describe your interests, skills, or relevant experience..."></textarea>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field half">
+            <label>Volunteer Status <span class="req">*</span></label>
+            <div class="radio-group" style="margin-top:8px;">
+              <label><input type="radio" name="v-status" value="New"     onchange="toggleStartYear()"> New</label>
+              <label><input type="radio" name="v-status" value="Current" onchange="toggleStartYear()"> Current</label>
+            </div>
+          </div>
+          <div class="field half" id="start-year-field" style="display:none;">
+            <label>Start Year</label>
+            <input type="text" id="v-start-year" placeholder="e.g. 2022" maxlength="4" inputmode="numeric" autocomplete="off">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="err-box" id="err0"></div>
+    <div class="nav-row">
+      <span></span>
+      <button class="btn btn-next" onclick="nextStep(0)">Continue to Medical Authorization &rarr;</button>
+    </div>
+  </div><!-- /panel0 -->
+
+
+  <!-- ══════════════════════════════════════════
+       STEP 2 — MEDICAL AUTHORIZATION
+  ══════════════════════════════════════════ -->
+  <div class="panel" id="panel1">
+
+    <div class="card">
+      <div class="card-hd">Volunteer Authorization for Emergency Medical Treatment</div>
+      <div class="card-body">
+        <p style="font-size:.83rem;color:#2a3a4a;margin-bottom:14px;line-height:1.55;font-weight:600;">
+          In the event emergency medical aid/treatment is required due to illness or injury during the process of my acting as a volunteer for or while being on the property of Timber Grove Farm for any program of Positive Strides, Inc. ("PSI"), I authorize PSI to secure and retain medical treatment and transportation if needed and to release this information:
+        </p>
+        <div class="row">
+          <div class="field half">
+            <label>Name <span class="req">*</span></label>
+            <!-- autofilled from Step 1 name, editable -->
+            <input type="text" id="med-name" placeholder="Full name" class="tc-name" autocomplete="off">
+          </div>
+          <div class="field half">
+            <label>Date of Birth <span class="req">*</span></label>
+            <!-- autofilled from Step 1 DOB, editable -->
+            <div class="date-parts" id="med-dob-wrap">
+              <input type="text" class="date-seg mm" id="med-dob-mm" placeholder="MM" maxlength="2" inputmode="numeric" autocomplete="off">
+              <span class="date-sep">/</span>
+              <input type="text" class="date-seg dd" id="med-dob-dd" placeholder="DD" maxlength="2" inputmode="numeric" autocomplete="off">
+              <span class="date-sep">/</span>
+              <input type="text" class="date-seg yy" id="med-dob-yy" placeholder="YYYY" maxlength="4" inputmode="numeric" autocomplete="off">
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <!-- autofilled from Step 1 street -->
+          <div class="field full"><label>Street Address <span class="req">*</span></label><input type="text" id="med-street" placeholder="Street address" autocomplete="off"></div>
+        </div>
+        <div class="row">
+          <!-- autofilled from Step 1 city/state/zip -->
+          <div class="field half"><label>City <span class="req">*</span></label><input type="text" id="med-city" class="tc-name" autocomplete="off"></div>
+          <div class="field w90"><label>State</label><input type="text" id="med-state" value="MD" maxlength="2" autocomplete="off"></div>
+          <div class="field w130"><label>Zip Code</label><input type="text" id="med-zip" maxlength="10" autocomplete="off"></div>
+        </div>
+        <div class="row">
+          <!-- autofilled from Step 1 phones -->
+          <div class="field half"><label>Home Phone</label><input type="tel" id="med-home-phone" placeholder="(___) ___-____" class="phone-fmt" autocomplete="off"></div>
+          <div class="field half"><label>Cell <span class="req">*</span></label><input type="tel" id="med-cell" placeholder="(___) ___-____" class="phone-fmt" autocomplete="off"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">Medical Information</div>
+      <div class="card-body">
+        <div class="row">
+          <div class="field half"><label>Physician's Name <span class="req">*</span></label><input type="text" id="med-physician" placeholder="Dr. Last Name" class="tc-name" autocomplete="off"></div>
+          <div class="field half"><label>Physician's Phone <span class="req">*</span></label><input type="tel" id="med-physician-phone" placeholder="(___) ___-____" class="phone-fmt" autocomplete="off"></div>
+        </div>
+        <div class="row">
+          <div class="field full"><label>Preferred Medical Facility</label><input type="text" id="med-facility" placeholder="Hospital or urgent care name" autocomplete="off"></div>
+        </div>
+        <div class="row">
+          <div class="field half"><label>Health Insurance Company</label><input type="text" id="med-ins-co" placeholder="Insurance company name" autocomplete="off"></div>
+          <div class="field half"><label>Policy Number</label><input type="text" id="med-policy" placeholder="Policy #" autocomplete="off"></div>
+        </div>
+        <div class="row">
+          <div class="field full">
+            <label>Allergies <span class="req">*</span></label>
+            <input type="text" id="med-allergies" placeholder="List allergies, or type 'None'" autocomplete="off">
+            <div class="hint">*If you require an EPI pen, you must provide your own and administer it yourself.</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field full">
+            <label>Important Health Information or History</label>
+            <textarea id="med-history" rows="3" placeholder="List any conditions, medications, or health information relevant to emergency care..."></textarea>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field full">
+            <label>Current Tetanus Shot? <span class="req">*</span></label>
+            <div class="radio-group" style="margin-top:8px;">
+              <label><input type="radio" name="tetanus" value="Yes"> Yes</label>
+              <label><input type="radio" name="tetanus" value="No">  No</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">Emergency Contacts</div>
+      <div class="card-body">
+        <p class="subsection-label">Primary Emergency Contact</p>
+        <div class="row">
+          <div class="field third"><label>Name <span class="req">*</span></label><input type="text" id="ec1-name" placeholder="Full name" class="tc-name" autocomplete="new-password"></div>
+          <div class="field third"><label>Relationship <span class="req">*</span></label><input type="text" id="ec1-rel" placeholder="e.g. Spouse" autocomplete="new-password"></div>
+          <div class="field third"><label>Phone <span class="req">*</span></label><input type="tel" id="ec1-phone" placeholder="(___) ___-____" class="phone-fmt" autocomplete="off"></div>
+        </div>
+        <p class="subsection-label" style="margin-top:8px;">Secondary Emergency Contact</p>
+        <div class="row">
+          <div class="field third"><label>Name</label><input type="text" id="ec2-name" placeholder="Full name" class="tc-name" autocomplete="new-password"></div>
+          <div class="field third"><label>Relationship</label><input type="text" id="ec2-rel" placeholder="e.g. Parent" autocomplete="new-password"></div>
+          <div class="field third"><label>Phone</label><input type="tel" id="ec2-phone" placeholder="(___) ___-____" class="phone-fmt" autocomplete="off"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">Consent</div>
+      <div class="card-body">
+        <p style="font-size:.83rem;color:#2a3a4a;margin-bottom:14px;line-height:1.55;font-weight:600;">
+          I consent to any emergency medical treatment and/or first aid I might receive during the course of my volunteering with PSI and agree to comply with any reasonable request for additional medical tests as may be indicated from time to time. This consent includes, but is not limited to x-rays, surgery, hospitalization, medication and any treatment procedure deemed "life-saving" by a physician.
+        </p>
+        <div class="row">
+          <div class="field half">
+            <label>Volunteer Signature <span class="req">*</span></label>
+            <div class="sig-typed-wrapper" id="sig-med-wrap">
+              <input type="text" class="sig-typed-input" id="sig-med"
+                     placeholder="Type your full name to sign"
+                     autocomplete="off" spellcheck="false" readonly
+                     onfocus="this.removeAttribute('readonly')" onclick="this.removeAttribute('readonly')">
+              <div class="sig-underline"></div>
+              <div class="sig-caption">Electronic Signature</div>
+            </div>
+            <p class="sig-typed-note">Type your name above as your electronic signature</p>
+          </div>
+          <div class="field half">
+            <label>Date <span class="req">*</span></label>
+            <div class="date-parts" id="date-med-wrap">
+              <input type="text" class="date-seg mm" id="date-med-mm" placeholder="MM" maxlength="2" inputmode="numeric" autocomplete="off">
+              <span class="date-sep">/</span>
+              <input type="text" class="date-seg dd" id="date-med-dd" placeholder="DD" maxlength="2" inputmode="numeric" autocomplete="off">
+              <span class="date-sep">/</span>
+              <input type="text" class="date-seg yy" id="date-med-yy" placeholder="YYYY" maxlength="4" inputmode="numeric" autocomplete="off">
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field half">
+            <label>Printed Name <span class="req">*</span></label>
+            <!-- autofilled from Step 1 name, editable -->
+            <input type="text" id="pname-med" placeholder="Print your full name" class="tc-name autofill-name" autocomplete="off">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="err-box" id="err1"></div>
+    <div class="nav-row">
+      <button class="btn btn-prev" onclick="prevStep(1)">&larr; Back</button>
+      <button class="btn btn-next" onclick="nextStep(1)">Continue to Confidentiality &rarr;</button>
+    </div>
+  </div><!-- /panel1 -->
+
+
+  <!-- ══════════════════════════════════════════
+       STEP 3 — CONFIDENTIALITY POLICY
+  ══════════════════════════════════════════ -->
+  <div class="panel" id="panel2">
+
+    <div class="card">
+      <div class="card-hd">Confidentiality Policy</div>
+      <div class="card-body">
+        <div class="policy-box">
+          <ol>
+            <li>Positive Strides, Inc. shall preserve the right of confidentiality for all individuals in its program, participants, instructors and volunteers.</li>
+            <li>The staff, instructors, board, volunteers and any others working with the program shall keep confidential all medical, financial, social, referral and personal information regarding a person and his/her family. Information will not be disclosed to anyone without proper authorization.</li>
+            <li>A rider may not be competent to give consent for disclosure of medical or sensitive information because of age (under 18 years) or mental incapacity. If this is the case only the parent(s) or legal representative or others defined by the State of Maryland have this authority.</li>
+            <li>Adult riders are presumed legally competent to give or deny consent unless they have been adjudicated incompetent to make this type of health care decisions. If a substitute decision maker has been appointed, specific written consent from that individual is required.</li>
+            <li>Access to or disclosure of sensitive information should not be given to anyone without the rider's written consent on the basis of perception. (i.e. at the request of a healthcare facility.)</li>
+            <li>Disclosure of information to outside agencies is only done with written consent of the rider.</li>
+            <li>Breach of this confidentiality policy may result in loss of position or removal from the volunteer program.</li>
+          </ol>
+        </div>
+        <div class="ack-row">
+          <input type="checkbox" id="conf-ack">
+          <label for="conf-ack"><strong>I understand and will observe the confidentiality policy of Positive Strides, Inc.</strong></label>
+        </div>
+        <div class="row">
+          <div class="field half">
+            <label>Volunteer Signature <span class="req">*</span></label>
+            <div class="sig-typed-wrapper" id="sig-conf-wrap">
+              <input type="text" class="sig-typed-input" id="sig-conf"
+                     placeholder="Type your full name to sign"
+                     autocomplete="off" spellcheck="false" readonly
+                     onfocus="this.removeAttribute('readonly')" onclick="this.removeAttribute('readonly')">
+              <div class="sig-underline"></div>
+              <div class="sig-caption">Electronic Signature</div>
+            </div>
+            <p class="sig-typed-note">Type your name above as your electronic signature</p>
+          </div>
+          <div class="field half">
+            <label>Date <span class="req">*</span></label>
+            <div class="date-parts" id="date-conf-wrap">
+              <input type="text" class="date-seg mm" id="date-conf-mm" placeholder="MM" maxlength="2" inputmode="numeric" autocomplete="off">
+              <span class="date-sep">/</span>
+              <input type="text" class="date-seg dd" id="date-conf-dd" placeholder="DD" maxlength="2" inputmode="numeric" autocomplete="off">
+              <span class="date-sep">/</span>
+              <input type="text" class="date-seg yy" id="date-conf-yy" placeholder="YYYY" maxlength="4" inputmode="numeric" autocomplete="off">
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field half">
+            <label>Printed Name <span class="req">*</span></label>
+            <input type="text" id="pname-conf" placeholder="Print your full name" class="tc-name autofill-name" autocomplete="off">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="err-box" id="err2"></div>
+    <div class="nav-row">
+      <button class="btn btn-prev" onclick="prevStep(2)">&larr; Back</button>
+      <button class="btn btn-next" onclick="nextStep(2)">Continue to Liability Waiver &rarr;</button>
+    </div>
+  </div><!-- /panel2 -->
+
+
+  <!-- ══════════════════════════════════════════
+       STEP 4 — LIABILITY WAIVER (PSI)
+  ══════════════════════════════════════════ -->
+  <div class="panel" id="panel3">
+
+    <div class="card">
+      <div class="card-hd">Waiver of Liability, Assumption of Risk, Indemnification, and Covenant Not To Sue</div>
+      <div class="card-body">
+        <div class="waiver-note">⚠️ This is a legal document. Please read carefully before signing.</div>
+        <div class="policy-box">
+          <p><strong>Waiver of Liability:</strong> For the privilege of riding, handling, working, and/or being around equines today and on all future dates, I, on behalf of myself, my family members, my heirs, personal representatives, or assigns, do hereby agree to release, waive and discharge Positive Strides, Inc., its respective directors, managers, employees, volunteers, and agents (hereinafter collectively referred to as "PSI") as well as Kimberly Hopkins, property owner of 6292 Statum Road, Preston, Maryland, from any liability or responsibility for accident, damage, injury or illness to myself or any horse used by me which may be owned or leased by PSI, or to any family member or spectator accompanying me while on the premises of Hopkins resulting from the inherent risks of equine activities or from the ordinary negligence (active or passive) of PSI or Kimberly Hopkins.</p>
+          <p>AND that except in the event of PSI and Kimberly Hopkins' wanton and willful and/or reckless conduct and/or gross negligence, I agree not to bring any claims, demands, actions and causes of action, and/or litigation, against PSI and Kimberly Hopkins for any economic and/or non-economic losses due to bodily injury, death and/or property damage sustained by me.</p>
+          <p><strong>Assumption of Inherent Risks:</strong> I understand and assume the inherent risks involved in equine activities, including those used for therapeutic purposes, which risks include, but are not limited to, bodily injury, physical harm and even death to horses, riders, and spectators. "Inherent risks of equine activities" include:</p>
+          <ul>
+            <li>The propensity of any equine to behave in ways that may result in injury, harm, or death</li>
+            <li>The unpredictability of an equine's reaction to sounds, sudden movements and unfamiliar objects, persons or other animals</li>
+            <li>Certain hazards such as surface or subsurface objects</li>
+            <li>Collisions with other equines, animals, people and objects</li>
+            <li>Limited availability of emergency medical care</li>
+            <li>The potential of a participant or spectator to act in a negligent manner</li>
+          </ul>
+          <p><strong>Participant Agreement / Indemnification:</strong> I also agree to hold harmless, defend and indemnify PSI and Kimberly Hopkins (including costs associated with defending a suit, judgment, court costs, investigation costs, and reasonable attorney fees) from any and all claims arising from my injury or loss due to my participation as a rider, handler or spectator.</p>
+          <p><strong>Covenant not to Sue; Mediation; Venue; and Severability:</strong> I covenant not to sue PSI or Kimberly Hopkins for any present or future claim arising directly or indirectly from my participation. Any action shall be brought within one (1) year. Prior to litigation, such dispute shall first be mediated. Mediation and litigation shall be conducted in Caroline County, Maryland.</p>
+          <p><strong>Acknowledgement of Understanding:</strong> I understand this is a legal document and that I am signing this agreement freely and voluntarily. I understand I am giving up substantial rights, including my right to sue PSI and Kimberly Hopkins for injury or death resulting from the inherent risks of equine activities or the active or passive ordinary negligence of PSI and Kimberly Hopkins.</p>
+        </div>
+        <div class="ack-row">
+          <input type="checkbox" id="waiver-ack">
+          <label for="waiver-ack"><strong>I have read and fully understand this Waiver of Liability and agree to its terms. I am at least 18 years old.</strong></label>
+        </div>
+        <div class="row">
+          <div class="field half">
+            <label>Signature (Must be at least 18 years old) <span class="req">*</span></label>
+            <div class="sig-typed-wrapper" id="sig-waiver-wrap">
+              <input type="text" class="sig-typed-input" id="sig-waiver"
+                     placeholder="Type your full name to sign"
+                     autocomplete="off" spellcheck="false" readonly
+                     onfocus="this.removeAttribute('readonly')" onclick="this.removeAttribute('readonly')">
+              <div class="sig-underline"></div>
+              <div class="sig-caption">Electronic Signature</div>
+            </div>
+            <p class="sig-typed-note">Type your name above as your electronic signature</p>
+          </div>
+          <div class="field half">
+            <label>Date <span class="req">*</span></label>
+            <div class="date-parts" id="date-waiver-wrap">
+              <input type="text" class="date-seg mm" id="date-waiver-mm" placeholder="MM" maxlength="2" inputmode="numeric" autocomplete="off">
+              <span class="date-sep">/</span>
+              <input type="text" class="date-seg dd" id="date-waiver-dd" placeholder="DD" maxlength="2" inputmode="numeric" autocomplete="off">
+              <span class="date-sep">/</span>
+              <input type="text" class="date-seg yy" id="date-waiver-yy" placeholder="YYYY" maxlength="4" inputmode="numeric" autocomplete="off">
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field half">
+            <label>Printed Name <span class="req">*</span></label>
+            <input type="text" id="pname-waiver" placeholder="Print your full name" class="tc-name autofill-name" autocomplete="off">
+          </div>
+          <div class="field half">
+            <label>Signing as <span class="req">*</span></label>
+            <select id="waiver-role">
+              <option value="">— Select —</option>
+              <option value="Volunteer" selected>Volunteer</option>
+              <option value="Client">Client</option>
+              <option value="Parent">Parent</option>
+              <option value="Legal Guardian">Legal Guardian</option>
+              <option value="Guest or Spectator">Guest or Spectator</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="err-box" id="err3"></div>
+    <div class="nav-row">
+      <button class="btn btn-prev" onclick="prevStep(3)">&larr; Back</button>
+      <button class="btn btn-next" onclick="nextStep(3)">Continue to Farm Waiver &rarr;</button>
+    </div>
+  </div><!-- /panel3 -->
+
+
+  <!-- ══════════════════════════════════════════
+       STEP 5 — TIMBER GROVE FARM WAIVER
+  ══════════════════════════════════════════ -->
+  <div class="panel" id="panel4">
+
+    <div class="card">
+      <div class="card-hd">Timber Grove Farm — Volunteer Waiver</div>
+      <div class="card-body">
+        <div class="waiver-note">⚠️ This is a legal document. Please read carefully before signing.</div>
+        <div style="text-align:center;margin-bottom:10px;font-size:.85rem;color:#3a4a5a;font-weight:600;">Timber Grove Farm &bull; 6292 Statum Road, Preston, Maryland 21655</div>
+        <div class="policy-box">
+          <p><strong>I UNDERSTAND</strong> that I am voluntarily participating / or allowing my minor child to participate in a sport that is considered dangerous and can result in serious injury. I realize that when riding or driving, a predator (man) attempts to dominate and control an animal of prey (horse/pony) that is normally ten times larger, stronger and faster.</p>
+          <p><strong>I UNDERSTAND</strong> that the nature of stable horses is unpredictable. The horse/pony can shy, rear, buck, and attempt to throw a rider or driver without warning. I realize that no horse/pony is considered completely safe. The horse/pony can cause injury or accident at any time.</p>
+          <p><strong>I UNDERSTAND</strong> that I will adhere strictly to guidelines set forth by Ashley Hopkins and Kimberly Hopkins and while participating in riding or driving lessons, working around farm animals and visiting the premises, but by adhering to those guidelines does not ensure my safety or the safety of those with me.</p>
+          <p><strong>I UNDERSTAND</strong> that Ashley Hopkins and Kimberly Hopkins nor anyone associated with the riding facility is NOT liable for any accident or injury to me, my minor child or any siblings or guests that may accompany me to the premises. I understand that I enter into this agreement and participate at MY OWN RISK. I further agree that I will not attempt to sue, for monetary gain, Ashley Hopkins, Kimberly Hopkins nor anyone associated with Ashley Hopkins or Kimberly Hopkins.</p>
+        </div>
+        <div class="ack-row">
+          <input type="checkbox" id="farm-ack">
+          <label for="farm-ack"><strong>I have read and understand the Timber Grove Farm Volunteer Waiver and agree to its terms.</strong></label>
+        </div>
+        <div class="row">
+          <div class="field half">
+            <label>Volunteer Signature <span class="req">*</span></label>
+            <div class="sig-typed-wrapper" id="sig-farm-wrap">
+              <input type="text" class="sig-typed-input" id="sig-farm"
+                     placeholder="Type your full name to sign"
+                     autocomplete="off" spellcheck="false" readonly
+                     onfocus="this.removeAttribute('readonly')" onclick="this.removeAttribute('readonly')">
+              <div class="sig-underline"></div>
+              <div class="sig-caption">Electronic Signature</div>
+            </div>
+            <p class="sig-typed-note">Type your name above as your electronic signature</p>
+          </div>
+          <div class="field half">
+            <label>Date <span class="req">*</span></label>
+            <div class="date-parts" id="date-farm-wrap">
+              <input type="text" class="date-seg mm" id="date-farm-mm" placeholder="MM" maxlength="2" inputmode="numeric" autocomplete="off">
+              <span class="date-sep">/</span>
+              <input type="text" class="date-seg dd" id="date-farm-dd" placeholder="DD" maxlength="2" inputmode="numeric" autocomplete="off">
+              <span class="date-sep">/</span>
+              <input type="text" class="date-seg yy" id="date-farm-yy" placeholder="YYYY" maxlength="4" inputmode="numeric" autocomplete="off">
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field half">
+            <label>Printed Name <span class="req">*</span></label>
+            <input type="text" id="pname-farm" placeholder="Print your full name" class="tc-name autofill-name" autocomplete="off">
+          </div>
+        </div>
+
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid #d0dce8;">
+          <p class="subsection-label">For Minor Child (complete only if signing on behalf of a minor)</p>
+          <div class="row">
+            <div class="field half">
+              <label>Parent/Guardian Signature</label>
+              <div class="sig-wrap">
+                <canvas class="sig-canvas" id="sig-minor" width="340" height="80"></canvas>
+                <button type="button" class="sig-clear" onclick="clearSig('sig-minor')">Clear</button>
+              </div>
+              <p class="sig-label">Sign with mouse or finger</p>
+            </div>
+            <div class="field half">
+              <label>Date</label>
+              <div class="date-parts" id="date-minor-wrap">
+                <input type="text" class="date-seg mm" id="date-minor-mm" placeholder="MM" maxlength="2" inputmode="numeric" autocomplete="off">
+                <span class="date-sep">/</span>
+                <input type="text" class="date-seg dd" id="date-minor-dd" placeholder="DD" maxlength="2" inputmode="numeric" autocomplete="off">
+                <span class="date-sep">/</span>
+                <input type="text" class="date-seg yy" id="date-minor-yy" placeholder="YYYY" maxlength="4" inputmode="numeric" autocomplete="off">
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="field half">
+              <label>Printed Name</label>
+              <input type="text" id="pname-minor" placeholder="Parent/Guardian printed name" class="tc-name" autocomplete="off">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="err-box" id="err4"></div>
+    <div class="nav-row">
+      <button class="btn btn-prev" onclick="prevStep(4)">&larr; Back</button>
+      <button class="btn btn-submit" id="sub-btn" onclick="submitForm()">Submit Application</button>
+    </div>
+  </div><!-- /panel4 -->
+
+</div><!-- /wrap -->
+
+<script>
+// ══════════════════════════════════════════════
+//  EMAILJS CONFIG — update these 3 values
+// ══════════════════════════════════════════════
+const EJS_SERVICE  = 'YOUR_SERVICE_ID';
+const EJS_TEMPLATE = 'YOUR_TEMPLATE_ID';
+const EJS_KEY      = 'YOUR_PUBLIC_KEY';
+const OFFICE_EMAIL = 'positivestridesoffice@gmail.com';
+// ══════════════════════════════════════════════
+
+var currentStep = 0;
+
+// ─── TITLE CASE ──────────────────────────────
+function toTitleCase(str) {
+  return str.replace(/\S+/g, function(w) {
+    return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+  });
+}
+// Fire on both input (real-time) and blur (catch paste/autofill)
+document.querySelectorAll('.tc-name').forEach(function(el) {
+  el.addEventListener('input', function() {
+    var pos = this.selectionStart;
+    this.value = toTitleCase(this.value);
+    try { this.setSelectionRange(pos, pos); } catch(e) {}
+  });
+  el.addEventListener('blur', function() {
+    this.value = toTitleCase(this.value);
+  });
+});
+
+// ─── PREFILL MEDICAL AUTH from Step 1 ────────
+// Called when navigating TO Step 2 (panel1)
+// Only fills fields that are currently empty so
+// returning users who already edited aren't overwritten.
+function prefillMedAuth() {
+  function copy(fromId, toId) {
+    var from = document.getElementById(fromId);
+    var to   = document.getElementById(toId);
+    if (!from || !to) return;
+    if (!to.value.trim()) to.value = from.value;
+  }
+  copy('v-name',       'med-name');
+  copy('v-street',     'med-street');
+  copy('v-city',       'med-city');
+  copy('v-state',      'med-state');
+  copy('v-zip',        'med-zip');
+  copy('v-home-phone', 'med-home-phone');
+  copy('v-cell',       'med-cell');
+  // DOB segments
+  ['mm','dd','yy'].forEach(function(seg) {
+    var from = document.getElementById('v-dob-' + seg);
+    var to   = document.getElementById('med-dob-' + seg);
+    if (from && to && !to.value.trim()) to.value = from.value;
+  });
+}
+
+// ─── PREFILL PRINTED NAMES from Step 1 name ──
+// Called when navigating to steps 2–5
+// Only fills if currently empty
+function prefillPrintedNames() {
+  var name = (document.getElementById('v-name') || {}).value || '';
+  var tcName = toTitleCase(name);
+  document.querySelectorAll('.autofill-name').forEach(function(el) {
+    if (!el.value.trim()) el.value = tcName;
+  });
+}
+
+// ─── PHONE FORMATTING ───────────────────────
+function fmtPhone(v) {
+  var d = v.replace(/\D/g, '');
+  if (!d.length) return '';
+  if (d.length <= 3)  return '(' + d;
+  if (d.length <= 6)  return '(' + d.slice(0,3) + ') ' + d.slice(3);
+  return '(' + d.slice(0,3) + ') ' + d.slice(3,6) + '-' + d.slice(6,10);
+}
+document.querySelectorAll('.phone-fmt').forEach(function(el) {
+  el.addEventListener('input', function() {
+    var pos = this.selectionStart;
+    var old = this.value;
+    this.value = fmtPhone(this.value);
+    if (this.value.length !== old.length) pos = this.value.length;
+    try { this.setSelectionRange(pos, pos); } catch(e) {}
+  });
+});
+
+// ─── DATE AUTO-ADVANCE ──────────────────────
+function setupDateAutoAdvance() {
+  document.querySelectorAll('.date-parts').forEach(function(wrap) {
+    var mm   = wrap.querySelector('.mm');
+    var dd   = wrap.querySelector('.dd');
+    var yyyy = wrap.querySelector('.yy');
+    if (!mm || !dd || !yyyy) return;
+
+    [mm, dd, yyyy].forEach(function(seg) {
+      seg.addEventListener('keypress', function(e) {
+        if (!/\d/.test(e.key)) e.preventDefault();
+      });
+    });
+
+    mm.addEventListener('input', function() {
+      var v = this.value.replace(/\D/g,'').slice(0,2);
+      if (v.length === 2 && parseInt(v,10) > 12) v = '12';
+      this.value = v;
+      if (v.length === 2) dd.focus();
+    });
+    dd.addEventListener('input', function() {
+      var v = this.value.replace(/\D/g,'').slice(0,2);
+      if (v.length === 2 && parseInt(v,10) > 31) v = '31';
+      this.value = v;
+      if (v.length === 2) yyyy.focus();
+    });
+    yyyy.addEventListener('input', function() {
+      this.value = this.value.replace(/\D/g,'').slice(0,4);
+    });
+    dd.addEventListener('keydown',   function(e) { if (e.key==='Backspace' && !this.value) mm.focus(); });
+    yyyy.addEventListener('keydown', function(e) { if (e.key==='Backspace' && !this.value) dd.focus(); });
+  });
+}
+
+// ─── DATE DEFAULTS (today) ───────────────────
+function setDateDefaults() {
+  var d  = new Date();
+  var mm = String(d.getMonth()+1).padStart(2,'0');
+  var dd = String(d.getDate()).padStart(2,'0');
+  var yy = String(d.getFullYear());
+  [
+    ['date-photo-mm','date-photo-dd','date-photo-yy'],
+    ['date-med-mm',  'date-med-dd',  'date-med-yy'],
+    ['date-conf-mm', 'date-conf-dd', 'date-conf-yy'],
+    ['date-waiver-mm','date-waiver-dd','date-waiver-yy'],
+    ['date-farm-mm', 'date-farm-dd', 'date-farm-yy'],
+    ['date-minor-mm','date-minor-dd','date-minor-yy']
+  ].forEach(function(ids) {
+    var em = document.getElementById(ids[0]);
+    var ed = document.getElementById(ids[1]);
+    var ey = document.getElementById(ids[2]);
+    if (em && !em.value) em.value = mm;
+    if (ed && !ed.value) ed.value = dd;
+    if (ey && !ey.value) ey.value = yy;
+  });
+}
+
+// ─── START YEAR TOGGLE ──────────────────────
+function toggleStartYear() {
+  var cur = document.querySelector('input[name="v-status"][value="Current"]');
+  document.getElementById('start-year-field').style.display = (cur && cur.checked) ? '' : 'none';
+}
+
+// ─── DATE HELPERS ────────────────────────────
+function getDateVal(mmId, ddId, yyId) {
+  var mm = (document.getElementById(mmId)||{}).value||'';
+  var dd = (document.getElementById(ddId)||{}).value||'';
+  var yy = (document.getElementById(yyId)||{}).value||'';
+  if (!mm && !dd && !yy) return '';
+  return mm + '/' + dd + '/' + yy;
+}
+function dateComplete(mmId, ddId, yyId) {
+  var mm = (document.getElementById(mmId)||{}).value||'';
+  var dd = (document.getElementById(ddId)||{}).value||'';
+  var yy = (document.getElementById(yyId)||{}).value||'';
+  return mm.length >= 1 && dd.length >= 1 && yy.length === 4;
+}
+
+// ─── CANVAS SIGNATURE PAD (minor child only) ─
+var sigData    = {};
+var sigDrawing = {};
+
+function initSigs() {
+  ['sig-minor'].forEach(function(id) {
+    var c = document.getElementById(id);
+    if (!c) return;
+    sigData[id]    = false;
+    sigDrawing[id] = false;
+
+    function getXY(e) {
+      var r  = c.getBoundingClientRect();
+      var sx = c.width  / r.width;
+      var sy = c.height / r.height;
+      if (e.touches) return { x:(e.touches[0].clientX-r.left)*sx, y:(e.touches[0].clientY-r.top)*sy };
+      return { x:(e.clientX-r.left)*sx, y:(e.clientY-r.top)*sy };
+    }
+    function start(e) {
+      e.preventDefault();
+      sigDrawing[id] = true;
+      var p = getXY(e);
+      var ctx = c.getContext('2d');
+      ctx.beginPath(); ctx.moveTo(p.x, p.y);
+    }
+    function move(e) {
+      if (!sigDrawing[id]) return;
+      e.preventDefault();
+      var p   = getXY(e);
+      var ctx = c.getContext('2d');
+      ctx.lineWidth = 1.8; ctx.lineCap = 'round'; ctx.strokeStyle = '#1a2a3a';
+      ctx.lineTo(p.x, p.y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(p.x, p.y);
+      sigData[id] = true;
+      c.classList.remove('err');
+    }
+    function stop() { sigDrawing[id] = false; }
+
+    c.addEventListener('mousedown',  start);
+    c.addEventListener('mousemove',  move);
+    c.addEventListener('mouseup',    stop);
+    c.addEventListener('mouseleave', stop);
+    c.addEventListener('touchstart', start, { passive: false });
+    c.addEventListener('touchmove',  move,  { passive: false });
+    c.addEventListener('touchend',   stop);
+  });
+}
+
+function clearSig(id) {
+  var c = document.getElementById(id);
+  c.getContext('2d').clearRect(0, 0, c.width, c.height);
+  sigData[id] = false;
+}
+
+function resizeSigs() {
+  ['sig-minor'].forEach(function(id) {
+    var c = document.getElementById(id);
+    if (!c) return;
+    var w = c.parentElement.clientWidth;
+    if (w > 0 && c.width !== w) {
+      var saved = sigData[id] ? c.toDataURL() : null;
+      c.width  = w;
+      c.height = Math.round(w * 0.22);
+      if (saved) {
+        var img = new Image();
+        img.onload = function() { c.getContext('2d').drawImage(img,0,0,c.width,c.height); };
+        img.src = saved;
+      }
+    }
+  });
+}
+
+// ─── NAVIGATION ─────────────────────────────
+function goTo(n) {
+  document.getElementById('panel' + currentStep).classList.remove('active');
+  document.getElementById('stab'  + currentStep).classList.remove('active');
+  document.getElementById('stab'  + currentStep).classList.add('done');
+  currentStep = n;
+  document.getElementById('panel' + n).classList.add('active');
+  document.getElementById('stab'  + n).classList.remove('done');
+  document.getElementById('stab'  + n).classList.add('active');
+  // Prefill when arriving at medical auth or later steps
+  if (n >= 1) {
+    prefillMedAuth();
+    prefillPrintedNames();
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  resizeSigs();
+}
+
+function nextStep(n) {
+  var errs = validateStep(n);
+  showErr(n, errs);
+  if (errs.length) { scrollToErr(n); return; }
+  clearErr(n);
+  goTo(n + 1);
+}
+function prevStep(n) { clearErr(n); goTo(n - 1); }
+function scrollToErr(n) {
+  var box = document.getElementById('err' + n);
+  if (box) box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ─── VALIDATION ─────────────────────────────
+function gv(id) { var e = document.getElementById(id); return e ? e.value.trim() : ''; }
+function gr(nm) { var e = document.querySelector('input[name="'+nm+'"]:checked'); return e ? e.value : ''; }
+function gc(id) { var e = document.getElementById(id); return e ? e.checked : false; }
+function gs(id) { return sigData[id] === true; }
+
+function validateStep(n) {
+  var errs = [];
+
+  function req(id, label) {
+    var e = document.getElementById(id);
+    if (!e) return;
+    if (!e.value.trim()) { e.classList.add('err'); errs.push(label + ' is required.'); }
+    else e.classList.remove('err');
+  }
+  function reqR(nm, label) { if (!gr(nm)) errs.push(label + ' — please make a selection.'); }
+  function reqC(id, label) { if (!gc(id)) errs.push(label + ' — please check the box.'); }
+  function reqS(id, label) {
+    if (!gs(id)) { var e = document.getElementById(id); if(e) e.classList.add('err'); errs.push(label + ' — signature required.'); }
+    else { var e = document.getElementById(id); if(e) e.classList.remove('err'); }
+  }
+  function reqTyped(id, label) {
+    var e = document.getElementById(id);
+    var wrap = document.getElementById(id + '-wrap') || (e && e.parentElement);
+    if (!e || !e.value.trim()) {
+      if (wrap) wrap.classList.add('err');
+      if (e)    e.classList.add('err');
+      errs.push(label + ' — please type your name.');
+    } else {
+      if (wrap) wrap.classList.remove('err');
+      if (e)    e.classList.remove('err');
+    }
+  }
+  function reqDate(mmId, ddId, yyId, label) {
+    if (!dateComplete(mmId, ddId, yyId)) {
+      var wrap = document.getElementById(mmId);
+      if (wrap) wrap.closest('.date-parts').classList.add('err');
+      errs.push(label + ' — complete date required (MM/DD/YYYY).');
+    } else {
+      var wrap = document.getElementById(mmId);
+      if (wrap) wrap.closest('.date-parts').classList.remove('err');
+    }
+  }
+
+  if (n === 0) {
+    req('v-name',    'Volunteer name');
+    reqDate('v-dob-mm','v-dob-dd','v-dob-yy', 'Date of birth');
+    req('v-street',  'Street address');
+    req('v-city',    'City');
+    req('v-state',   'State');
+    req('v-zip',     'Zip code');
+    req('v-cell',    'Cell phone');
+    req('v-email',   'Email');
+    reqR('v-pref',   'Preferred contact method');
+    reqR('photo',    'Photo release decision');
+    reqTyped('sig-photo', 'Photo release signature');
+    reqDate('date-photo-mm','date-photo-dd','date-photo-yy', 'Photo release date');
+    req('pname-photo',   'Photo release: Printed name');
+    reqR('v-status', 'Volunteer status (New/Current)');
+  }
+  if (n === 1) {
+    req('med-name',            'Medical auth: Name');
+    reqDate('med-dob-mm','med-dob-dd','med-dob-yy', 'Medical auth: Date of birth');
+    req('med-street',          'Medical auth: Street address');
+    req('med-city',            'Medical auth: City');
+    req('med-cell',            'Medical auth: Cell phone');
+    req('med-physician',       'Physician name');
+    req('med-physician-phone', 'Physician phone');
+    req('med-allergies',       'Allergies (enter "None" if none)');
+    reqR('tetanus',            'Tetanus shot status');
+    req('ec1-name',            'Primary emergency contact: Name');
+    req('ec1-rel',             'Primary emergency contact: Relationship');
+    req('ec1-phone',           'Primary emergency contact: Phone');
+    reqTyped('sig-med',        'Medical authorization signature');
+    reqDate('date-med-mm','date-med-dd','date-med-yy', 'Medical auth: Date');
+    req('pname-med',           'Medical auth: Printed name');
+  }
+  if (n === 2) {
+    reqC('conf-ack',       'Confidentiality policy acknowledgement');
+    reqTyped('sig-conf',   'Confidentiality signature');
+    reqDate('date-conf-mm','date-conf-dd','date-conf-yy', 'Confidentiality date');
+    req('pname-conf',      'Confidentiality: Printed name');
+  }
+  if (n === 3) {
+    reqC('waiver-ack',       'Liability waiver acknowledgement');
+    reqTyped('sig-waiver',   'Liability waiver signature');
+    reqDate('date-waiver-mm','date-waiver-dd','date-waiver-yy', 'Liability waiver date');
+    req('pname-waiver',      'Liability waiver: Printed name');
+    req('waiver-role',       'Signing role');
+  }
+  if (n === 4) {
+    reqC('farm-ack',       'Farm waiver acknowledgement');
+    reqTyped('sig-farm',   'Farm waiver signature');
+    reqDate('date-farm-mm','date-farm-dd','date-farm-yy', 'Farm waiver date');
+    req('pname-farm',      'Farm waiver: Printed name');
+  }
+  return errs;
+}
+
+function showErr(n, errs) {
+  var box = document.getElementById('err' + n);
+  if (!errs.length) { clearErr(n); return; }
+  var html = '<strong>Please fix the following before continuing:</strong><ul>';
+  errs.forEach(function(e) { html += '<li>' + e + '</li>'; });
+  box.innerHTML = html + '</ul>';
+  box.classList.add('on');
+}
+function clearErr(n) {
+  var box = document.getElementById('err' + n);
+  box.classList.remove('on');
+  box.innerHTML = '';
+}
+
+// ─── BUILD EMAIL MESSAGE ─────────────────────
+function buildMsg() {
+  var avail = [];
+  document.querySelectorAll('input[name="avail"]:checked').forEach(function(cb) { avail.push(cb.value); });
+
+  return (
+'VOLUNTEER APPLICATION — POSITIVE STRIDES\n' +
+'Submitted: ' + new Date().toLocaleString() + '\n\n' +
+'━━━━ VOLUNTEER CONTACT INFORMATION ━━━━\n' +
+'Name:              ' + gv('v-name') + '\n' +
+'Date of Birth:     ' + getDateVal('v-dob-mm','v-dob-dd','v-dob-yy') + '\n' +
+'Address:           ' + gv('v-street') + '\n' +
+'City/State/Zip:    ' + gv('v-city') + ', ' + gv('v-state') + ' ' + gv('v-zip') + '\n' +
+'Home Phone:        ' + (gv('v-home-phone') || '—') + '\n' +
+'Cell:              ' + gv('v-cell') + '\n' +
+'Work Phone:        ' + (gv('v-work-phone') || '—') + '\n' +
+'Email:             ' + gv('v-email') + '\n' +
+'Preferred Contact: ' + (gr('v-pref') || '—') + '\n\n' +
+'━━━━ PHOTO RELEASE ━━━━\n' +
+'Decision:  ' + (gr('photo') || '—') + '\n' +
+'Signed by: ' + gv('sig-photo') + '\n' +
+'Printed:   ' + gv('pname-photo') + '\n' +
+'Date:      ' + getDateVal('date-photo-mm','date-photo-dd','date-photo-yy') + '\n\n' +
+'━━━━ VOLUNTEER AVAILABILITY ━━━━\n' +
+(avail.length ? avail.join(', ') : 'None selected') + '\n\n' +
+'━━━━ SPECIAL INTERESTS / SKILLS ━━━━\n' +
+(gv('v-interests') || '—') + '\n\n' +
+'━━━━ VOLUNTEER STATUS ━━━━\n' +
+'Status:     ' + (gr('v-status') || '—') + '\n' +
+'Start Year: ' + (gv('v-start-year') || '—') + '\n\n' +
+'━━━━ MEDICAL AUTHORIZATION ━━━━\n' +
+'Name:             ' + gv('med-name') + '\n' +
+'Date of Birth:    ' + getDateVal('med-dob-mm','med-dob-dd','med-dob-yy') + '\n' +
+'Address:          ' + gv('med-street') + ', ' + gv('med-city') + ', ' + gv('med-state') + ' ' + gv('med-zip') + '\n' +
+'Home Phone:       ' + (gv('med-home-phone') || '—') + '\n' +
+'Cell:             ' + gv('med-cell') + '\n' +
+'Physician:        ' + gv('med-physician') + '\n' +
+'Physician Phone:  ' + gv('med-physician-phone') + '\n' +
+'Medical Facility: ' + (gv('med-facility') || '—') + '\n' +
+'Insurance Co:     ' + (gv('med-ins-co') || '—') + '\n' +
+'Policy Number:    ' + (gv('med-policy') || '—') + '\n' +
+'Allergies:        ' + gv('med-allergies') + '\n' +
+'Health History:   ' + (gv('med-history') || '—') + '\n' +
+'Tetanus Current:  ' + (gr('tetanus') || '—') + '\n' +
+'EC Primary:       ' + gv('ec1-name') + ' (' + gv('ec1-rel') + ') ' + gv('ec1-phone') + '\n' +
+'EC Secondary:     ' + (gv('ec2-name') ? gv('ec2-name') + ' (' + gv('ec2-rel') + ') ' + gv('ec2-phone') : '—') + '\n' +
+'Signed by:        ' + gv('pname-med') + ' on ' + getDateVal('date-med-mm','date-med-dd','date-med-yy') + '\n' +
+'Signature:        ' + gv('sig-med') + '\n\n' +
+'━━━━ CONFIDENTIALITY POLICY ━━━━\n' +
+'Acknowledged and signed by: ' + gv('pname-conf') + ' on ' + getDateVal('date-conf-mm','date-conf-dd','date-conf-yy') + '\n' +
+'Signature:        ' + gv('sig-conf') + '\n\n' +
+'━━━━ LIABILITY WAIVER (PSI) ━━━━\n' +
+'Acknowledged and signed by: ' + gv('pname-waiver') + ' on ' + getDateVal('date-waiver-mm','date-waiver-dd','date-waiver-yy') + '\n' +
+'Signature:        ' + gv('sig-waiver') + '\n' +
+'Signing as: ' + gv('waiver-role') + '\n\n' +
+'━━━━ TIMBER GROVE FARM WAIVER ━━━━\n' +
+'Acknowledged and signed by: ' + gv('pname-farm') + ' on ' + getDateVal('date-farm-mm','date-farm-dd','date-farm-yy') + '\n' +
+'Signature:        ' + gv('sig-farm') + '\n' +
+(gv('pname-minor') ? 'Parent/Guardian: ' + gv('pname-minor') + ' on ' + getDateVal('date-minor-mm','date-minor-dd','date-minor-yy') + '\n' : '') +
+'\n—— End of Application ——'
+  );
+}
+
+// ─── SUBMIT ─────────────────────────────────
+function submitForm() {
+  // Full cross-step validation
+  for (var s = 0; s < 5; s++) {
+    var stepErrs = validateStep(s);
+    if (stepErrs.length) {
+      var badStep = s;
+      goTo(badStep);
+      setTimeout(function(ss) { return function() {
+        showErr(ss, validateStep(ss));
+        scrollToErr(ss);
+      }; }(badStep), 150);
+      return;
+    }
+  }
+
+  var btn = document.getElementById('sub-btn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+
+  var volunteerName  = gv('v-name');
+  var applicantEmail = gv('v-email');
+  var msg = buildMsg();
+
+  if (typeof emailjs === 'undefined' || EJS_KEY === 'YOUR_PUBLIC_KEY') {
+    console.log('EmailJS not configured — form data:\n' + msg);
+    showSuccess();
+    return;
+  }
+
+  emailjs.init({ publicKey: EJS_KEY });
+  emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
+    to_email:  OFFICE_EMAIL,
+    from_name: volunteerName,
+    reply_to:  applicantEmail || OFFICE_EMAIL,
+    subject:   'New Volunteer Application — ' + volunteerName,
+    message:   msg
+  }).then(function() {
+    if (applicantEmail) {
+      return emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
+        to_email:  applicantEmail,
+        from_name: 'Positive Strides Center',
+        reply_to:  OFFICE_EMAIL,
+        subject:   'Your Volunteer Application — Positive Strides',
+        message:   'Thank you for submitting your volunteer application!\nWe look forward to having you join our team. A copy of your application is below for your records.\n\n' + msg
+      });
+    }
+  }).then(function() {
+    showSuccess();
+  }).catch(function(err) {
+    console.error('EmailJS error:', err);
+    alert('Your application was received, but there was a problem with the email confirmation.\nError: ' + JSON.stringify(err) + '\n\nPlease contact positivestridesoffice@gmail.com to confirm receipt.');
+    showSuccess();
+  });
+}
+
+function showSuccess() {
+  var wrap = document.querySelector('.wrap');
+  var succ = document.getElementById('success');
+  wrap.innerHTML = '';
+  succ.style.display = 'block';
+  wrap.appendChild(succ);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── INIT ────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  setupDateAutoAdvance();
+  setDateDefaults();
+  initSigs();
+  resizeSigs();
+});
+window.addEventListener('resize', resizeSigs);
+</script>
+</body>
+</html>
