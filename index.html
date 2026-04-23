@@ -505,6 +505,28 @@ select {
             <label>Printed Name <span class="req">*</span></label>
             <input type="text" id="pname-photo" placeholder="Print your full name" class="tc-name autofill-name" autocomplete="off">
           </div>
+
+        <div class="row">
+          <div class="field full">
+            <label>SMS Communications <span style="font-weight:400;font-size:.78rem;color:#5a6a7a;">(optional)</span></label>
+            <div style="background:#e8f2fb;border:1px solid #b8ccd8;border-radius:5px;padding:14px 16px;margin-top:4px;">
+              <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:.85rem;line-height:1.6;color:#1a2a3a;">
+                <input type="checkbox" id="sms-consent" name="smsConsent" value="yes"
+                       style="margin-top:3px;flex-shrink:0;width:16px;height:16px;accent-color:#2a7ab5;cursor:pointer;">
+                <span>
+                  <strong>I consent to receive text messages (SMS/MMS) from Positive Strides Center</strong>
+                  at the mobile number provided above. Messages may include scheduling updates, reminders,
+                  event announcements, and program information. Message frequency varies. Message and data
+                  rates may apply. Reply <strong>STOP</strong> to opt out at any time. Reply
+                  <strong>HELP</strong> for assistance. View our
+                  <a href="https://positivestridescenter.org/privacy-policy" target="_blank" style="color:#2a7ab5;">Privacy Policy</a>
+                  and
+                  <a href="https://positivestridescenter.org/terms-and-conditions" target="_blank" style="color:#2a7ab5;">Terms &amp; Conditions</a>.
+                </span>
+              </label>
+            </div>
+          </div>
+        </div>
         </div>
       </div>
     </div>
@@ -1369,6 +1391,7 @@ function buildMsg() {
 'Cell:              ' + gv('v-cell') + '\n' +
 'Work Phone:        ' + (gv('v-work-phone') || '—') + '\n' +
 'Email:             ' + gv('v-email') + '\n' +
+'SMS Consent:       ' + (document.getElementById('sms-consent').checked ? 'YES — consented to receive SMS' : 'No consent given') + '\n' +
 'Preferred Contact: ' + (gr('v-pref') || '—') + '\n\n' +
 '━━━━ PHOTO RELEASE ━━━━\n' +
 'Decision:  ' + (gr('photo') || '—') + '\n' +
